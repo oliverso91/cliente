@@ -1,0 +1,213 @@
+<!DOCTYPE html5>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Compilador</title>
+    <link rel="stylesheet" href="./public/css/codemirror.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" rel="stylesheet"/>
+  <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Slabo+27px&display=swap" rel="stylesheet">
+</head>
+
+<body style="background-color:#E8E8E8;">
+  <nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" >COMPI STUDIO</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Archivo
+        <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li><a href="#popupLogin" data-rel="popup" data-position-to="window" class="" data-transition="pop">Nuevo</a></li>
+          <li><a href="#" id="select_logo">Abrir</a> <input type="file" id="file-input" style="display:none;"></li>
+          <li><a href="#" class="" id="guardar" onclick="saveTextAsFile()"/> Guardar</a></li>
+          <li><a href="#" class="" id="guardarC" onclick="guardarComo()"/> Guardar Como...</a></li></li>
+        </ul>
+      </li>
+      <li><a><input type="button" value="Compilar" class="" onclick="generar3D()"/></a></li>
+      <li><a><input type="button" value="Ejecución codigo 3D" class="" onclick="ejecutar()"/></a></li>
+      <li class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Reportes
+        <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li><a><input type="button" value="Errores" class="" id="primero"/></a></li>
+          <li><a><input type="button" value="Tabla de Simbolos" class="" id="primero"/></a></li>
+          <li><a><input type="button" value="AST" class="" id="primero"/></a></li>
+          <li><a><input type="button" value="Optimización" class="" id="primero"/></a></li>
+
+        </ul>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+
+    <center>
+
+        <button class="btn btn-warning" id="btnDebug" name="btnDebug" onclick="debug()" style="display: none;">Debugger</button>
+        <button class="btn btn-info" id="btnNextStep" name="btnNextStep" style="display: none;" onclick="c3d.continuarInstruccion()">Siguiente instrucción</button>
+        <button class="btn btn-light" id="btnNextBreak" name="btnNextBreak" style="display: none;" onclick="c3d.continuarDebugger()">Siguiente breakpoint</button>
+        <button class="btn btn-danger" id="btnStop" name="btnStop" style="display: none;" onclick="c3d.detenerDebugger()">Detener</button>
+    </center>
+
+
+    <div class="container">
+        <div class="col-md-12">
+        <div class="col-md-6">
+            <h3 style="color: #C90404;">Contenido del archivo:</h3>
+            <textarea id="entrada" name="entrada"></textarea>
+        </div>
+        <div class="col-md-6">
+            <h3 style="color: #C90404;">Codigo 3D generado</h3>
+            <textarea id="entrada3D" name="entrada3D"></textarea>
+        </div>
+
+        <div class="column_layout" style="width: 420px; display:none;">
+            <h3 style="color: beige;">Debugger</h3>
+            <div class="row_layout" style="height: 450px; overflow: auto;">
+                <div class="column_layout bg-light text-dark" style="width: 120px; border: 1px solid rgb(0, 0, 0);">
+                    <table id="tablaStack" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Stack</th>
+                                <th scope="col"></th>
+                            </tr>
+
+                            <tr>
+                                <th scope="col">Dir</th>
+                                <th scope="col">Val</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="column_layout" style="width: 10px;">
+                    <br/>
+                </div>
+                <div class="column_layout bg-light text-dark" style="width: 120px; border: 1px solid rgb(0, 0, 0);">
+                    <table id="tablaHeap" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Heap</th>
+                                <th scope="col"></th>
+                            </tr>
+
+                            <tr>
+                                <th scope="col">Dir</th>
+                                <th scope="col">Val</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="column_layout" style="width: 10px;">
+                    <br/>
+                </div>
+                <div class="column_layout bg-light text-dark" style="width: 120px; border: 1px solid rgb(0, 0, 0);">
+                    <table id="tablaSim" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Temp</th>
+                                <th scope="col"></th>
+                            </tr>
+
+                            <tr>
+                                <th scope="col">Id</th>
+                                <th scope="col">Val</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div style="min-width: 15px;" class="column_layout"><br/></div>
+        <div class="column_layout">
+            <h3 style="color: #C90404;">Consola</h3>
+            <textarea class="consola" id="consola" name="consola" readonly rows="25"></textarea>
+        </div>
+
+        </div>
+    </div>
+    <br/>
+    <div id="tsVar" style="background-color: aliceblue;">
+        <h3>Variables</h3>
+
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Identificador</th>
+                    <th scope="col">Posición</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <div id="tsFunc" style="background-color: aliceblue;">
+        <h3>Funciones</h3>
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Identificador</th>
+                    <th scope="col">Parametros</th>
+                    <th scope="col">Tamaño</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <script src="./Analizador3D/Arbol/AccesoEstructura.js"></script>
+    <script src="./Analizador3D/Arbol/Asignacion3D.js"></script>
+    <script src="./Analizador3D/Arbol/AsignacionEstructura.js"></script>
+    <script src="./Analizador3D/Arbol/AST3D.js"></script>
+    <script src="./Analizador3D/Arbol/Etiqueta.js"></script>
+    <script src="./Analizador3D/Arbol/FinalizarMetodo.js"></script>
+    <script src="./Analizador3D/Arbol/Identificador3D.js"></script>
+    <script src="./Analizador3D/Arbol/IniciarMetodo.js"></script>
+    <script src="./Analizador3D/Arbol/Llamada3D.js"></script>
+    <script src="./Analizador3D/Arbol/Metodo3D.js"></script>
+    <script src="./Analizador3D/Arbol/Operacion3D.js"></script>
+    <script src="./Analizador3D/Arbol/Primitivo3D.js"></script>
+    <script src="./Analizador3D/Arbol/Print3D.js"></script>
+    <script src="./Analizador3D/Arbol/PunteroHeap.js"></script>
+    <script src="./Analizador3D/Arbol/SaltoCondicional.js"></script>
+    <script src="./Analizador3D/Arbol/SaltoIncondicional.js"></script>
+    <script src="./Analizador3D/Gramatica/Gramatica3D.js"></script>
+    <script src="./Analizador3D/TablaSimbolo/Simbolo3D.js"></script>
+    <script src="./Analizador3D/TablaSimbolo/Tabla3D.js"></script>
+    <script src="./Analizador3D/C3D.js"></script>
+
+    <script src="./Main.js"></script>
+    <script src="./public/js/codemirror.js"></script>
+    <script src="./public/js/Jquery.js"></script>
+    <script src="./public/js/bootstrap.js"></script>
+    <script src="./public/Mode/javascript/javascript.js"></script>
+    <script src="./public/Mode/clike/clike.js"></script>
+    <script>
+        const editor = CodeMirror.fromTextArea(entrada, {
+            lineNumbers: true,
+            mode: "text/x-java"
+        });
+        const editor3D = CodeMirror.fromTextArea(entrada3D, {
+            lineNumbers: true,
+            mode: "javascript"
+        });
+        editor.setSize(500, 700);
+        editor3D.setSize(500, 700);
+    </script>
+</body>
+
+</html>

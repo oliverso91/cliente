@@ -1,0 +1,56 @@
+numeric factorial(numeric x){
+	if(x==0){
+    	return 1;
+    }
+  return factorial(x-1)*x;
+}
+
+print(factorial(5));
+
+---------------------------------------------------------
+
+numeric ackermann(numeric m, 
+                  numeric n) {
+  if (m == 0) {
+    return n + 1;
+  }
+  if (n == 0){
+    return ackermann(m - 1, 1);
+  }
+  return ackermann(m - 1, ackermann(m, n - 1));
+}
+
+print(ackermann(3,3));
+
+---------------------------------------------------------
+
+integer a = 0;
+while(a < 4){
+  print(a);
+  a = a + 1;
+}
+
+---------------------------------------------------------
+
+integer b = 0;
+do{
+  print(b);
+  b = b + 1;
+}while(b < 6);
+
+---------------------------------------------------------
+
+string hola = "hola";
+print(hola);
+hola = "adios";
+print(hola);
+
+---------------------------------------------------------
+
+string test(string x){
+	x = "cambio";
+  return x;
+}
+
+
+print(test("variable 1"));
